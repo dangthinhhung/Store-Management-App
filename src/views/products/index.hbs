@@ -1,0 +1,73 @@
+<div class="page-header">
+    <h2>Danh sách sản phẩm</h2>
+    <a href="/products/add" class="btn btn-primary">Thêm sản phẩm</a>
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã SP</th>
+                <th>Tên sản phẩm</th>
+                <th>Giá bán</th>
+                <th>Tồn kho</th>
+                <th>Đơn vị</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each products}}
+            <tr>
+                <td>{{this.product_code}}</td>
+                <td>{{this.name}}</td>
+                <td>{{formatCurrency this.default_selling_price}}</td>
+                <td>{{this.stock_quantity}}</td>
+                <td>{{this.unit}}</td>
+                <td>
+                    {{#if this.is_active}}
+                    <span class="badge badge-success">Đang bán</span>
+                    {{else}}
+                    <span class="badge badge-danger">Ngừng bán</span>
+                    {{/if}}
+                </td>
+                <td>
+                    <a href="/products/{{this.product_code}}/edit" class="btn-icon">Sửa</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-icon {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>

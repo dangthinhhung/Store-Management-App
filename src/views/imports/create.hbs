@@ -1,0 +1,169 @@
+<div class="page-header">
+    <h2>Tạo phiếu nhập hàng</h2>
+    <a href="/imports" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="form-container">
+    <form action="/imports" method="POST" id="importForm">
+        <div id="items-container">
+            <!-- Items will be added here -->
+        </div>
+
+        <button type="button" class="btn btn-success" id="addItemBtn">+ Thêm sản phẩm</button>
+
+        <div class="form-group" style="max-width: 300px; margin-left: auto;">
+            <label class="form-label">Hình thức thanh toán</label>
+            <select name="payment_method" class="form-control">
+                <option value="Chuyển khoản">Chuyển khoản</option>
+                <option value="Tiền mặt">Tiền mặt</option>
+            </select>
+        </div>
+
+        <div class="total-section">
+            <h3>Tổng tiền: <span id="totalCost">0 ₫</span></h3>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu phiếu nhập</button>
+    </form>
+</div>
+
+<!-- Template for new item row -->
+<template id="itemTemplate">
+    <div class="item-row">
+        <div class="row">
+            <div class="col-4">
+                <div class="form-group">
+                    <label class="form-label">Sản phẩm</label>
+                    <input type="text" name="product_code" class="form-control product-input" list="productList"
+                        placeholder="Nhập mã hoặc tên" required>
+                    <input type="hidden" name="product_name" class="product-name-hidden">
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-group">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" name="quantity" class="form-control qty-input" min="1" value="1" required>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-group">
+                    <label class="form-label">Giá nhập</label>
+                    <input type="text" name="import_price" class="form-control price-input currency-input" value="0"
+                        required>
+                </div>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-danger remove-btn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<datalist id="productList">
+    {{#each products}}
+    <option value="{{this.name}} - {{this.product_code}}"></option>
+    {{/each}}
+</datalist>
+
+<script>
+    const container = document.getElementById('items-container');
+    const template = document.getElementById('itemTemplate');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const totalCostSpan = document.getElementById('totalCost');
+
+    function addItem() {
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+        updateTotal();
+    }
+
+    // Add initial item
+    addItem();
+
+    addItemBtn.addEventListener('click', addItem);
+
+    container.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-btn')) {
+            e.target.closest('.item-row').remove();
+            updateTotal();
+        }
+    });
+
+    container.addEventListener('input', function (e) {
+        if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+            updateTotal();
+        }
+    });
+
+    function updateTotal() {
+        let total = 0;
+        const rows = container.querySelectorAll('.item-row');
+        rows.forEach(row => {
+            const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            const priceValue = row.querySelector('.price-input').value.replace(/,/g, '') || '0';
+            const price = parseFloat(priceValue) || 0;
+            total += qty * price;
+        });
+        totalCostSpan.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+    }
+</script>
+
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-row {
+        padding: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        background: #f8fafc;
+    }
+
+    .row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+    }
+
+    .col-4 {
+        flex: 4;
+    }
+
+    .col-3 {
+        flex: 3;
+    }
+
+    .col-2 {
+        flex: 2;
+    }
+
+    .btn-success {
+        background-color: #22c55e;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+        width: 100%;
+    }
+
+    .total-section {
+        margin: 20px 0;
+        padding-top: 20px;
+        border-top: 2px solid #e2e8f0;
+        text-align: right;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

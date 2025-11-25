@@ -1,0 +1,255 @@
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Chỉnh sửa phiếu lương tháng {{slip.month}}/{{slip.year}}</h1>
+            <p class="text-muted">Mã phiếu: <strong>{{slip.code}}</strong></p>
+        </div>
+        <div>
+            <a href="/users/salary-slips/{{slip.id}}" class="btn btn-secondary">← Quay lại</a>
+        </div>
+    </div>
+
+    <form action="/users/salary-slips/{{slip.id}}" method="POST">
+        <div class="card mb-20">
+            <div class="card-header">
+                <h3>Nhân viên trong phiếu lương</h3>
+            </div>
+            <table class="table" id="salaryTable">
+                <thead>
+                    <tr>
+                        <th>Nhân viên</th>
+                        <th>Lương cứng</th>
+                        <th>Thưởng</th>
+                        <th>Phạt</th>
+                        <th>Tổng</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each currentSalaries}}
+                    <tr data-salary-id="{{this.id}}">
+                        <td>
+                            <strong>{{this.full_name}}</strong>
+                            <input type="hidden" name="salary_id[]" value="{{this.id}}">
+                            <input type="hidden" name="user_id[]" value="{{this.user_id}}">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control currency-input" name="amount[]"
+                                value="{{this.amount}}" required>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control currency-input" name="bonus[]"
+                                value="{{this.bonus}}">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control currency-input" name="penalty[]"
+                                value="{{this.penalty}}">
+                        </td>
+                        <td class="total-cell">{{formatCurrency this.amount}}</td>
+                        <td>
+                            <button type="button" class="btn-icon text-danger" onclick="removeRow(this)">Xóa</button>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+
+        {{#if availableUsers.length}}
+        <div class="card mb-20">
+            <div class="card-header">
+                <h3>Thêm nhân viên vào phiếu lương</h3>
+            </div>
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label>Chọn nhân viên</label>
+                    <select id="addEmployeeSelect" class="form-control">
+                        <option value="">-- Chọn nhân viên --</option>
+                        {{#each availableUsers}}
+                        <option value="{{this.id}}" data-name="{{this.full_name}}"
+                            data-salary="{{this.default_salary}}">
+                            {{this.full_name}} - {{formatCurrency this.default_salary}}
+                        </option>
+                        {{/each}}
+                    </select>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addEmployee()">+ Thêm vào phiếu</button>
+            </div>
+        </div>
+        {{/if}}
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Thông tin phiếu lương</h3>
+            </div>
+            <div style="padding: 20px;">
+                <div class="form-group">
+                    <label>Tổng lương (tự động tính)</label>
+                    <input type="text" class="form-control" id="totalAmount" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Hình thức thanh toán</label>
+                    <select name="payment_method" class="form-control">
+                        <option value="Tiền mặt" {{#if (eq slip.payment_method 'Tiền mặt' )}}selected{{/if}}>Tiền mặt
+                        </option>
+                        <option value="Chuyển khoản" {{#if (eq slip.payment_method 'Chuyển khoản' )}}selected{{/if}}>
+                            Chuyển khoản</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú</label>
+                    <textarea name="note" class="form-control">{{slip.note}}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: right;">
+            <a href="/users/salary-slips/{{slip.id}}" class="btn btn-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Currency formatting
+    document.querySelectorAll('.currency-input').forEach(input => {
+        input.addEventListener('blur', function () {
+            formatCurrencyField(this);
+            calculateTotal(this.closest('tr'));
+            calculateGrandTotal();
+        });
+    });
+
+    function formatCurrencyField(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value) {
+            input.value = new Intl.NumberFormat('vi-VN').format(value);
+        }
+    }
+
+    function calculateTotal(row) {
+        const amount = parseFloat(row.querySelector('input[name="amount[]"]').value.replace(/\D/g, '')) || 0;
+        const bonus = parseFloat(row.querySelector('input[name="bonus[]"]').value.replace(/\D/g, '')) || 0;
+        const penalty = parseFloat(row.querySelector('input[name="penalty[]"]').value.replace(/\D/g, '')) || 0;
+        const total = amount + bonus - penalty;
+        row.querySelector('.total-cell').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+    }
+
+    function calculateGrandTotal() {
+        let total = 0;
+        document.querySelectorAll('#salaryTable tbody tr').forEach(row => {
+            const amount = parseFloat(row.querySelector('input[name="amount[]"]').value.replace(/\D/g, '')) || 0;
+            const bonus = parseFloat(row.querySelector('input[name="bonus[]"]').value.replace(/\D/g, '')) || 0;
+            const penalty = parseFloat(row.querySelector('input[name="penalty[]"]').value.replace(/\D/g, '')) || 0;
+            total += (amount + bonus - penalty);
+        });
+        document.getElementById('totalAmount').value = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+    }
+
+    function removeRow(btn) {
+        if (confirm('Bạn có chắc muốn xóa nhân viên này khỏi phiếu lương?')) {
+            btn.closest('tr').remove();
+            calculateGrandTotal();
+        }
+    }
+
+    function addEmployee() {
+        const select = document.getElementById('addEmployeeSelect');
+        const selectedOption = select.options[select.selectedIndex];
+
+        if (!selectedOption.value) {
+            alert('Vui lòng chọn nhân viên');
+            return;
+        }
+
+        const userId = selectedOption.value;
+        const userName = selectedOption.dataset.name;
+        const baseSalary = selectedOption.dataset.salary;
+
+        // Add new row
+        const tbody = document.querySelector('#salaryTable tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>
+                <strong>${userName}</strong>
+                <input type="hidden" name="salary_id[]" value="0">
+                <input type="hidden" name="user_id[]" value="${userId}">
+            </td>
+            <td>
+                <input type="text" class="form-control currency-input" name="amount[]" value="${new Intl.NumberFormat('vi-VN').format(baseSalary)}" required>
+            </td>
+            <td>
+                <input type="text" class="form-control currency-input" name="bonus[]" value="0">
+            </td>
+            <td>
+                <input type="text" class="form-control currency-input" name="penalty[]" value="0">
+            </td>
+            <td class="total-cell">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(baseSalary)}</td>
+            <td>
+                <button type="button" class="btn-icon text-danger" onclick="removeRow(this)">Xóa</button>
+            </td>
+        `;
+        tbody.appendChild(newRow);
+
+        // Re-attach event listeners
+        newRow.querySelectorAll('.currency-input').forEach(input => {
+            input.addEventListener('blur', function () {
+                formatCurrencyField(this);
+                calculateTotal(this.closest('tr'));
+                calculateGrandTotal();
+            });
+        });
+
+        // Remove from available list
+        selectedOption.remove();
+        select.selectedIndex = 0;
+
+        calculateGrandTotal();
+    }
+
+    // Initial calculation
+    document.querySelectorAll('#salaryTable tbody tr').forEach(row => {
+        calculateTotal(row);
+    });
+    calculateGrandTotal();
+</script>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .currency-input {
+        width: 120px;
+        text-align: right;
+    }
+
+    .total-cell {
+        font-weight: bold;
+        color: #166534;
+    }
+
+    .card-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #475569;
+    }
+</style>

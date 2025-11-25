@@ -1,0 +1,136 @@
+<div class="page-header">
+    <h2>Chi tiết giao dịch #{{transaction.id}}</h2>
+    <a href="#" class="btn btn-secondary" onclick="goBack(event)">Quay lại</a>
+</div>
+
+<div class="details-container">
+    <div class="card">
+        <h3>Thông tin giao dịch</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>Loại:</strong>
+                {{#if (eq transaction.type 'INCOME')}}
+                <span class="badge badge-success">Thu</span>
+                {{else}}
+                <span class="badge badge-danger">Chi</span>
+                {{/if}}
+            </div>
+            <div class="info-item">
+                <strong>Tên giao dịch:</strong> {{transaction.transaction_name}}
+            </div>
+            <div class="info-item">
+                <strong>Số tiền:</strong>
+                <span class="amount {{#if (eq transaction.type 'INCOME')}}text-success{{else}}text-danger{{/if}}">
+                    {{formatCurrency transaction.amount}}
+                </span>
+            </div>
+            <div class="info-item">
+                <strong>Hình thức:</strong> {{transaction.payment_method}}
+            </div>
+            <div class="info-item">
+                <strong>Ngày giao dịch:</strong> {{transaction.transaction_date}}
+            </div>
+            <div class="info-item">
+                <strong>Ngày tạo:</strong> {{transaction.created_at}}
+            </div>
+            {{#if customer}}
+            <div class="info-item">
+                <strong>Khách hàng:</strong>
+                <a href="/customers/{{customer.phone}}">{{customer.name}} - {{customer.phone}}</a>
+            </div>
+            {{/if}}
+            {{#if transaction.description}}
+            <div class="info-item full-width">
+                <strong>Mô tả:</strong> {{transaction.description}}
+            </div>
+            {{/if}}
+            {{#if transaction.note}}
+            <div class="info-item full-width">
+                <strong>Ghi chú:</strong> {{transaction.note}}
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<style>
+    .details-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .info-item {
+        padding: 10px 0;
+    }
+
+    .info-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .amount {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    .text-success {
+        color: #166534;
+    }
+
+    .text-danger {
+        color: #991b1b;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+
+<script>
+    function goBack(event) {
+        event.preventDefault();
+        const urlParams = new URLSearchParams(window.location.search);
+        const backUrl = urlParams.get('back');
+        if (backUrl) {
+            window.location.href = backUrl;
+        } else {
+            window.location.href = '/reports';
+        }
+    }
+</script>

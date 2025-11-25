@@ -1,0 +1,4 @@
+/* Add to public/css/style.css or src/views/layouts/main.hbs style block if exists. 
+   Since I don't have direct access to style.css easily without reading it, I will append a style block to sidebar.hbs or main.hbs. 
+   Actually, sidebar.hbs is a partial, so I can add a style tag there or just inline styles. 
+   Let's check if style.css exists first. */

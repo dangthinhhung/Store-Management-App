@@ -1,0 +1,41 @@
+<div class="dashboard-cards">
+    <div class="card">
+        <h3>Doanh thu hôm nay</h3>
+        <p class="value">0 ₫</p>
+    </div>
+    <div class="card">
+        <h3>Đơn hàng mới</h3>
+        <p class="value">0</p>
+    </div>
+    <div class="card">
+        <h3>Sản phẩm sắp hết</h3>
+        <p class="value">0</p>
+    </div>
+</div>
+
+<style>
+    .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+        font-size: 14px;
+        color: var(--secondary-color);
+        margin-bottom: 10px;
+    }
+
+    .card .value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--text-color);
+    }
+</style>

@@ -1,0 +1,50 @@
+<div class="page-header">
+    <h2>Sửa thông tin khách hàng</h2>
+    <a href="/customers" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="form-container">
+    <form action="/customers/{{customer.phone}}?_method=PUT" method="POST">
+        <div class="form-group">
+            <label class="form-label">Tên khách hàng <span class="required">*</span></label>
+            <input type="text" name="name" class="form-control" value="{{customer.name}}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" name="phone" class="form-control" value="{{customer.phone}}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" name="address" class="form-control" value="{{customer.address}}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ghi chú</label>
+            <textarea name="note" class="form-control" rows="3">{{customer.note}}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        max-width: 600px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .required {
+        color: red;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

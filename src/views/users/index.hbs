@@ -1,0 +1,98 @@
+<div class="page-header">
+    <h2>Nhân viên & Lương</h2>
+    <a href="/users/add" class="btn btn-primary">+ Thêm nhân viên mới</a>
+</div>
+
+<div class="row">
+    <div class="col-8">
+        <div class="card mb-20">
+            <h3>Danh sách nhân viên</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ tên</th>
+                        <th>Số điện thoại</th>
+                        <th>Lương cứng</th>
+                        <th>Mật khẩu</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each users}}
+                    <tr>
+                        <td>{{this.username}}</td>
+                        <td>{{this.full_name}} {{#if (eq this.role 'OWNER')}}<span
+                                class="badge badge-primary">Admin</span>{{/if}}</td>
+                        <td>{{this.phone}}</td>
+                        <td>{{formatCurrency this.default_salary}}</td>
+                        <td>
+                            <div class="password-field">
+                                <span class="password-mask">********</span>
+                                <span class="password-text" style="display: none;">{{this.plain_password}}</span>
+                                <button type="button" class="btn-icon-sm toggle-password"
+                                    onclick="togglePassword(this)">
+                                    👁️
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/users/{{this.id}}/edit" class="btn-icon">Sửa</a>
+                            {{#unless (eq this.role 'OWNER')}}
+                            <form action="/users/{{this.id}}?_method=DELETE" method="POST" style="display: inline;"
+                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?')">
+                                <button type="submit" class="btn-icon text-danger">Xóa</button>
+                            </form>
+                            {{/unless}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header-flex">
+                <h3>Lịch sử trả lương</h3>
+                <a href="/users/salary-slip" class="btn btn-success btn-sm">Tạo phiếu lương tháng</a>
+            </div>
+
+            <div class="salary-history-list">
+                {{#each salarySlips}}
+                <div class="salary-item">
+                    <div class="salary-info">
+                        <strong>Tháng {{this.month}}/{{this.year}}</strong>
+                        <span class="text-muted">{{formatDateTime this.created_at}}</span>
+                    </div>
+                    <div class="salary-amount">
+                        {{formatCurrency this.total_amount}}
+                    </div>
+                    <div class="salary-actions">
+                        <a href="/users/salary-slips/{{this.id}}" class="btn-icon-sm">Xem</a>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(btn) {
+        const container = btn.parentElement;
+        const mask = container.querySelector('.password-mask');
+        const text = container.querySelector('.password-text');
+
+        if (text.style.display === 'none') {
+            text.style.display = 'inline';
+            mask.style.display = 'none';
+            btn.textContent = '🔒';
+        } else {
+            text.style.display = 'none';
+            mask.style.display = 'inline';
+            btn.textContent = '👁️';
+        }
+    }
+</script>

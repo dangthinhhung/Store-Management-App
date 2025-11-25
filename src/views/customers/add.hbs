@@ -1,0 +1,62 @@
+<div class="page-header">
+    <h2>Thêm khách hàng mới</h2>
+    <a href="/customers" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="form-container">
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    <form action="/customers" method="POST">
+        <div class="form-group">
+            <label class="form-label">Tên khách hàng <span class="required">*</span></label>
+            <input type="text" name="name" class="form-control" value="{{data.name}}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input type="text" name="phone" class="form-control" value="{{data.phone}}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Địa chỉ</label>
+            <input type="text" name="address" class="form-control" value="{{data.address}}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ghi chú</label>
+            <textarea name="note" class="form-control" rows="3">{{data.note}}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu khách hàng</button>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        max-width: 600px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .required {
+        color: red;
+    }
+
+    .alert {
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

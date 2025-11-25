@@ -1,0 +1,22 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>Store Manager</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="/pos" class="{{#if (eq active 'pos')}}active{{/if}}">Đơn bán lẻ</a></li>
+            <li><a href="/workshop" class="{{#if (eq active 'workshop')}}active{{/if}}">Đơn xưởng</a></li>
+            <li><a href="/customers" class="{{#if (eq active 'customers')}}active{{/if}}">Khách hàng</a></li>
+
+            <li class="nav-divider"></li>
+
+            <li><a href="/products" class="{{#if (eq active 'products')}}active{{/if}}">Sản phẩm</a></li>
+            <li><a href="/imports" class="{{#if (eq active 'imports')}}active{{/if}}">Nhập hàng</a></li>
+
+            <li class="nav-divider"></li>
+
+            <li><a href="/reports" class="{{#if (eq active 'reports')}}active{{/if}}">Báo cáo</a></li>
+            <li><a href="/users" class="{{#if (eq active 'users')}}active{{/if}}">Nhân viên và lương</a></li>
+        </ul>
+    </nav>
+</aside>

@@ -1,0 +1,61 @@
+<div class="page-header">
+    <h2>Chi tiết phiếu nhập {{import.code}}</h2>
+    <a href="/imports" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="details-container">
+    <div class="info-group">
+        <p><strong>Ngày nhập:</strong> {{import.created_at}}</p>
+        <p><strong>Hình thức thanh toán:</strong> {{import.payment_method}}</p>
+        <p><strong>Tổng tiền:</strong> {{formatCurrency import.total_cost}}</p>
+        <p><strong>Người tạo:</strong> {{import.created_by}}</p>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã SP</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá nhập</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each import.items}}
+            <tr>
+                <td>{{this.product_code}}</td>
+                <td>{{this.product_name}}</td>
+                <td>{{this.quantity}}</td>
+                <td>{{formatCurrency this.import_price}}</td>
+                <td>{{formatCurrency (multiply this.quantity this.import_price)}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .details-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-group {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-group p {
+        margin-bottom: 10px;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

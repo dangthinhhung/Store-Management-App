@@ -1,0 +1,46 @@
+<div class="page-header">
+    <h2>Lịch sử nhập hàng</h2>
+    <a href="/imports/create" class="btn btn-primary">Nhập hàng mới</a>
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã phiếu</th>
+                <th>Ngày nhập</th>
+                <th>Tổng tiền</th>
+                <th>Hình thức</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each imports}}
+            <tr>
+                <td>{{this.code}}</td>
+                <td>{{this.created_at}}</td>
+                <td>{{formatCurrency this.total_cost}}</td>
+                <td>{{this.payment_method}}</td>
+                <td>
+                    <a href="/imports/{{this.id}}" class="btn-icon">Chi tiết</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-icon {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>

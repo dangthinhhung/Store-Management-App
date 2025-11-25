@@ -1,0 +1,14 @@
+<header class="top-header">
+    <div class="header-title">
+        <h1>{{title}}</h1>
+    </div>
+    <div class="header-right">
+        <div class="user-profile">
+            <span class="text-muted" style="margin-right: 8px;">Xin chào,</span>
+            <strong>{{#if user}}{{user.userFullName}}{{else}}Admin{{/if}}</strong>
+        </div>
+        <a href="/logout" class="btn btn-secondary btn-sm">
+            Đăng xuất
+        </a>
+    </div>
+</header>

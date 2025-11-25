@@ -1,0 +1,621 @@
+<div class="page-header">
+    <h2>Báo cáo doanh thu</h2>
+    <div>
+        <a href="/transactions" class="btn btn-secondary" style="margin-right: 10px;">Lịch sử giao dịch khác</a>
+        <button class="btn btn-primary" onclick="openModal()">+ Tạo giao dịch</button>
+    </div>
+</div>
+
+<div class="card mb-20">
+    <div class="report-controls">
+        <div class="btn-group">
+            <a href="/reports?type=daily"
+                class="btn {{#if (eq type 'daily')}}btn-primary{{else}}btn-secondary{{/if}}">Theo ngày</a>
+            <a href="/reports?type=monthly"
+                class="btn {{#if (eq type 'monthly')}}btn-primary{{else}}btn-secondary{{/if}}">Theo tháng</a>
+            <a href="/reports?type=yearly"
+                class="btn {{#if (eq type 'yearly')}}btn-primary{{else}}btn-secondary{{/if}}">Theo năm</a>
+        </div>
+
+        <form action="/reports" method="GET" class="date-picker-form">
+            <input type="hidden" name="type" value="{{type}}">
+
+            {{#if (eq type 'daily')}}
+            <input type="date" name="date" class="form-control" value="{{date}}" onchange="this.form.submit()">
+            {{/if}}
+
+            {{#if (eq type 'monthly')}}
+            <input type="month" name="month" class="form-control" value="{{month}}" onchange="this.form.submit()">
+            {{/if}}
+
+            {{#if (eq type 'yearly')}}
+            <select name="year" class="form-control" onchange="this.form.submit()">
+                <option value="2023" {{#if (eq year '2023' )}}selected{{/if}}>2023</option>
+                <option value="2024" {{#if (eq year '2024' )}}selected{{/if}}>2024</option>
+                <option value="2025" {{#if (eq year '2025' )}}selected{{/if}}>2025</option>
+            </select>
+            {{/if}}
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-4">
+        <div class="card summary-card bg-success-light">
+            <h3>Tổng thu</h3>
+            <div class="amount text-success">{{formatCurrency revenue}}</div>
+            <div class="breakdown">
+                <small>Tiền mặt: {{formatCurrency revenueCash}}</small>
+                <small>CK: {{formatCurrency revenueTransfer}}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card summary-card bg-danger-light">
+            <h3>Tổng chi</h3>
+            <div class="amount text-danger">{{formatCurrency expense}}</div>
+            <div class="breakdown">
+                <small>Tiền mặt: {{formatCurrency expenseCash}}</small>
+                <small>CK: {{formatCurrency expenseTransfer}}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card summary-card bg-primary-light">
+            <h3>Lợi nhuận</h3>
+            <div class="amount text-primary">{{formatCurrency profit}}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-20">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header-flex">
+                <h3>Chi tiết thu</h3>
+                <select id="revenueFilter" class="form-control form-control-sm" onchange="filterRevenue()">
+                    <option value="all">Tất cả nguồn</option>
+                    <option value="pos">Đơn lẻ</option>
+                    <option value="workshop">Đơn xưởng</option>
+                    <option value="other">Khác</option>
+                </select>
+                <select id="revenueCreatorFilter" class="form-control form-control-sm" onchange="filterRevenue()">
+                    <option value="all">Tất cả người tạo</option>
+                </select>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nguồn</th>
+                        <th>Số tiền</th>
+                        <th>Thời gian</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each orders}}
+                    <tr class="revenue-row revenue-pos {{#if this.is_hidden}}hidden-row{{/if}}"
+                        id="row-order-{{this.id}}" data-id="{{this.id}}" data-amount="{{this.final_amount}}"
+                        data-type="INCOME" data-method="{{this.payment_method}}" data-created-by="{{this.created_by}}"
+                        data-hidden="{{#if this.is_hidden}}true{{else}}false{{/if}}">
+                        <td>
+                            <a href="/pos/{{this.id}}?back=/reports" class="text-primary hover:underline">Đơn lẻ
+                                {{this.code}}</a>
+                        </td>
+                        <td>{{formatCurrency this.final_amount}}</td>
+                        <td>{{this.created_at}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="/pos/{{this.id}}?back=/reports" class="btn-icon-sm">Xem</a>
+                                <button type="button" class="btn-icon-sm btn-toggle-hide"
+                                    onclick="toggleHide('{{this.id}}', 'order')">
+                                    {{#if this.is_hidden}}Hiện{{else}}Ẩn{{/if}}
+                                </button>
+                                <button type="button" class="btn-icon-sm text-danger"
+                                    onclick="confirmDelete('{{this.id}}', 'order')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                    {{#each workshopPayments}}
+                    <tr class="revenue-row revenue-workshop {{#if this.is_hidden}}hidden-row{{/if}}"
+                        id="row-workshop-{{this.id}}" data-id="{{this.id}}" data-amount="{{this.amount}}"
+                        data-type="INCOME" data-method="{{this.payment_method}}" data-created-by="{{this.created_by}}"
+                        data-hidden="{{#if this.is_hidden}}true{{else}}false{{/if}}">
+                        <td>
+                            <a href="/workshop/{{this.workshop_order_id}}?back=/reports"
+                                class="text-primary hover:underline">Đơn xưởng {{this.code}}</a>
+                        </td>
+                        <td>{{formatCurrency this.amount}}</td>
+                        <td>{{this.created_at}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="/workshop/{{this.workshop_order_id}}?back=/reports" class="btn-icon-sm">Xem</a>
+                                <button type="button" class="btn-icon-sm btn-toggle-hide"
+                                    onclick="toggleHide('{{this.id}}', 'workshop-payment')">
+                                    {{#if this.is_hidden}}Hiện{{else}}Ẩn{{/if}}
+                                </button>
+                                <button type="button" class="btn-icon-sm text-danger"
+                                    onclick="confirmDelete('{{this.id}}', 'workshop-payment')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                    {{#each transactions}}
+                    {{#if (eq this.type 'INCOME')}}
+                    <tr class="revenue-row revenue-other {{#if this.is_hidden}}hidden-row{{/if}}"
+                        id="row-transaction-{{this.id}}" data-id="{{this.id}}" data-amount="{{this.amount}}"
+                        data-type="INCOME" data-method="{{this.payment_method}}" data-created-by="{{this.created_by}}"
+                        data-hidden="{{#if this.is_hidden}}true{{else}}false{{/if}}">
+                        <td>
+                            {{this.transaction_name}}
+                            <a href="/transactions/code/{{this.code}}"
+                                class="text-primary hover:underline">{{this.code}}</a>
+                        </td>
+                        <td>{{formatCurrency this.amount}}</td>
+                        <td>{{this.created_at}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="/transactions/code/{{this.code}}?back=/reports" class="btn-icon-sm">Xem</a>
+                                <button type="button" class="btn-icon-sm btn-toggle-hide"
+                                    onclick="toggleHide('{{this.id}}', 'transaction')">
+                                    {{#if this.is_hidden}}Hiện{{else}}Ẩn{{/if}}
+                                </button>
+                                <button type="button" class="btn-icon-sm text-danger"
+                                    onclick="confirmDelete('{{this.id}}', 'transaction')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header-flex">
+                <h3>Chi tiết chi</h3>
+                <select id="expenseFilter" class="form-control form-control-sm" onchange="filterExpense()">
+                    <option value="all">Tất cả loại chi</option>
+                    <option value="import">Nhập hàng</option>
+                    <option value="salary">Trả lương</option>
+                    <option value="other">Khác</option>
+                </select>
+                <select id="expenseCreatorFilter" class="form-control form-control-sm" onchange="filterExpense()">
+                    <option value="all">Tất cả người tạo</option>
+                </select>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mô tả</th>
+                        <th>Số tiền</th>
+                        <th>Thời gian</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each transactions}}
+                    {{#if (eq this.type 'EXPENSE')}}
+                    <tr class="expense-row {{#if (contains this.description 'Nhập hàng')}}expense-import{{else}}expense-other{{/if}} {{#if this.is_hidden}}hidden-row{{/if}}"
+                        id="row-transaction-{{this.id}}" data-id="{{this.id}}" data-amount="{{this.amount}}"
+                        data-type="EXPENSE" data-method="{{this.payment_method}}" data-created-by="{{this.created_by}}"
+                        data-hidden="{{#if this.is_hidden}}true{{else}}false{{/if}}">
+                        <td>
+                            {{#if (contains this.description 'Nhập hàng')}}
+                            {{{linkTransaction this.transaction_name this.description}}}
+                            {{else}}
+                            {{this.transaction_name}}
+                            <a href="/transactions/code/{{this.code}}"
+                                class="text-primary hover:underline">{{this.code}}</a>
+                            {{/if}}
+                        </td>
+                        <td>{{formatCurrency this.amount}}</td>
+                        <td>{{this.created_at}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                {{#if (contains this.description 'Nhập hàng')}}
+                                <a href="/imports?back=/reports" class="btn-icon-sm">Xem</a>
+                                {{else}}
+                                <a href="/transactions/code/{{this.code}}?back=/reports" class="btn-icon-sm">Xem</a>
+                                {{/if}}
+                                <button type="button" class="btn-icon-sm btn-toggle-hide"
+                                    onclick="toggleHide('{{this.id}}', 'transaction')">
+                                    {{#if this.is_hidden}}Hiện{{else}}Ẩn{{/if}}
+                                </button>
+                                <button type="button" class="btn-icon-sm text-danger"
+                                    onclick="confirmDelete('{{this.id}}', 'transaction')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+                    {{#each salarySlips}}
+                    <tr class="expense-row expense-salary {{#if this.is_hidden}}hidden-row{{/if}}"
+                        id="row-salary-{{this.id}}" data-id="{{this.id}}" data-amount="{{this.total_amount}}"
+                        data-type="EXPENSE" data-method="{{this.payment_method}}" data-created-by="{{this.created_by}}"
+                        data-hidden="{{#if this.is_hidden}}true{{else}}false{{/if}}">
+                        <td>
+                            <a href="/users/salary-slips/{{this.id}}" class="transaction-link">{{this.code}}</a> - Lương
+                            tháng {{this.month}}/{{this.year}}
+                        </td>
+                        <td>{{formatCurrency this.total_amount}}</td>
+                        <td>{{formatDateTime this.payment_date}}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="/users/salary-slips/{{this.id}}" class="btn-icon-sm">Xem</a>
+                                <button type="button" class="btn-icon-sm btn-toggle-hide"
+                                    onclick="toggleHide('{{this.id}}', 'salary')">
+                                    {{#if this.is_hidden}}Hiện{{else}}Ẩn{{/if}}
+                                </button>
+                                <button type="button" class="btn-icon-sm text-danger"
+                                    onclick="confirmDelete('{{this.id}}', 'salary')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- Create Transaction Modal -->
+<div id="transactionModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Tạo giao dịch mới</h3>
+        <form action="/reports/transaction" method="POST">
+            <div class="form-group">
+                <label>Loại giao dịch</label>
+                <select name="type" class="form-control" required>
+                    <option value="INCOME">Thu (Income)</option>
+                    <option value="EXPENSE">Chi (Expense)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tên giao dịch</label>
+                <input type="text" name="transaction_name" class="form-control"
+                    placeholder="VD: Bán phụ kiện, Thuê mặt bằng..." required>
+            </div>
+            <div class="form-group">
+                <label>Số tiền</label>
+                <input type="text" name="amount" class="form-control currency-input" required>
+            </div>
+            <div class="form-group">
+                <label>Mô tả</label>
+                <input type="text" name="description" class="form-control" placeholder="Chi tiết về giao dịch">
+            </div>
+            <div class="form-group">
+                <label>Hình thức thanh toán</label>
+                <select name="payment_method" class="form-control">
+                    <option value="Tiền mặt">Tiền mặt</option>
+                    <option value="Chuyển khoản">Chuyển khoản</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ngày giao dịch</label>
+                <input type="date" name="transaction_date" class="form-control" value="{{currentDate}}">
+            </div>
+            <div class="form-group">
+                <label>Khách hàng (Tùy chọn)</label>
+                <input type="text" id="customerSearchTransaction" class="form-control" placeholder="Tìm khách hàng..."
+                    autocomplete="off">
+                <input type="hidden" name="customer_id" id="customerIdTransaction">
+                <div id="customerResultsTransaction" class="search-results"></div>
+            </div>
+            <div class="form-group">
+                <label>Ghi chú</label>
+                <textarea name="note" class="form-control"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Lưu giao dịch</button>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <span class="close" onclick="closeDeleteModal()">&times;</span>
+        <h3>Xác nhận xóa</h3>
+        <p>Bạn có chắc chắn muốn xóa giao dịch này? Hành động này không thể hoàn tác.</p>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa vĩnh viễn</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('transactionModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('transactionModal').style.display = 'none';
+    }
+
+    let deleteId = null;
+    let deleteType = null;
+
+    function confirmDelete(id, type) {
+        deleteId = id;
+        deleteType = type;
+        document.getElementById('deleteConfirmModal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+        deleteId = null;
+        deleteType = null;
+        document.getElementById('deleteConfirmModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        if (!deleteId || !deleteType) return;
+
+        // AJAX Delete
+        fetch(`/reports/${deleteType}/${deleteId}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    const row = document.getElementById(`row-${deleteType}-${deleteId}`);
+                    if (row) {
+                        // Only subtract if it wasn't hidden
+                        const isHidden = row.getAttribute('data-hidden') === 'true';
+                        if (!isHidden) {
+                            updateTotals(row, 'remove');
+                        }
+                        row.remove();
+                    }
+                    closeDeleteModal();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Có lỗi xảy ra khi xóa giao dịch');
+            });
+    });
+
+    function toggleHide(id, type) {
+        fetch(`/reports/${type}/${id}/toggle-hide`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById(`row-${type}-${id}`);
+                    const isHidden = row.getAttribute('data-hidden') === 'true';
+                    const btn = row.querySelector('.btn-toggle-hide');
+                    const badge = row.querySelector('.badge');
+
+                    if (isHidden) {
+                        // Unhide
+                        row.classList.remove('hidden-row');
+                        row.setAttribute('data-hidden', 'false');
+                        btn.textContent = 'Ẩn';
+                        badge.classList.add('hidden');
+                        updateTotals(row, 'add');
+                    } else {
+                        // Hide
+                        row.classList.add('hidden-row');
+                        row.setAttribute('data-hidden', 'true');
+                        btn.textContent = 'Hiện';
+                        badge.classList.remove('hidden');
+                        updateTotals(row, 'remove');
+                    }
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Có lỗi xảy ra');
+            });
+    }
+
+    function updateTotals(row, action) {
+        const amount = parseFloat(row.getAttribute('data-amount'));
+        const type = row.getAttribute('data-type'); // INCOME or EXPENSE
+        const method = row.getAttribute('data-method'); // Tiền mặt or Chuyển khoản
+
+        // Selectors for totals
+        const totalRevenueEl = document.querySelector('.bg-success-light .amount');
+        const totalExpenseEl = document.querySelector('.bg-danger-light .amount');
+        const profitEl = document.querySelector('.bg-primary-light .amount');
+
+        // Helper to parse currency string to number
+        const parseMoney = (str) => {
+            return parseFloat(str.replace(/\./g, '').replace(' ₫', '').replace(/,/g, '')) || 0;
+        };
+
+        // Helper to format number to currency
+        const formatMoney = (num) => {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+        };
+
+        let currentRevenue = parseMoney(totalRevenueEl.textContent);
+        let currentExpense = parseMoney(totalExpenseEl.textContent);
+
+        if (type === 'INCOME') {
+            if (action === 'add') {
+                currentRevenue += amount;
+            } else {
+                currentRevenue -= amount;
+            }
+            totalRevenueEl.textContent = formatMoney(currentRevenue);
+
+            // Update breakdown (simplified selector logic, assuming structure)
+            const cashEl = document.querySelector('.bg-success-light .breakdown small:nth-child(1)');
+            const transferEl = document.querySelector('.bg-success-light .breakdown small:nth-child(2)');
+
+            if (method === 'Tiền mặt') {
+                let val = parseMoney(cashEl.textContent.split(': ')[1]);
+                val = action === 'add' ? val + amount : val - amount;
+                cashEl.textContent = `Tiền mặt: ${formatMoney(val)}`;
+            } else {
+                let val = parseMoney(transferEl.textContent.split(': ')[1]);
+                val = action === 'add' ? val + amount : val - amount;
+                transferEl.textContent = `CK: ${formatMoney(val)}`;
+            }
+
+        } else if (type === 'EXPENSE') {
+            if (action === 'add') {
+                currentExpense += amount;
+            } else {
+                currentExpense -= amount;
+            }
+            totalExpenseEl.textContent = formatMoney(currentExpense);
+
+            // Update breakdown
+            const cashEl = document.querySelector('.bg-danger-light .breakdown small:nth-child(1)');
+            const transferEl = document.querySelector('.bg-danger-light .breakdown small:nth-child(2)');
+
+            if (method === 'Tiền mặt') {
+                let val = parseMoney(cashEl.textContent.split(': ')[1]);
+                val = action === 'add' ? val + amount : val - amount;
+                cashEl.textContent = `Tiền mặt: ${formatMoney(val)}`;
+            } else {
+                let val = parseMoney(transferEl.textContent.split(': ')[1]);
+                val = action === 'add' ? val + amount : val - amount;
+                transferEl.textContent = `CK: ${formatMoney(val)}`;
+            }
+        }
+
+        // Update Profit
+        profitEl.textContent = formatMoney(currentRevenue - currentExpense);
+    }
+
+    function filterRevenue() {
+        const typeFilter = document.getElementById('revenueFilter').value;
+        const creatorFilter = document.getElementById('revenueCreatorFilter').value;
+        const rows = document.querySelectorAll('.revenue-row');
+
+        rows.forEach(row => {
+            const rowType = row.classList.contains('revenue-pos') ? 'pos' :
+                row.classList.contains('revenue-workshop') ? 'workshop' : 'other';
+            const rowCreator = row.getAttribute('data-created-by') || 'admin';
+
+            let show = true;
+            if (typeFilter !== 'all' && rowType !== typeFilter) show = false;
+            if (creatorFilter !== 'all' && rowCreator !== creatorFilter) show = false;
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+
+    function filterExpense() {
+        const typeFilter = document.getElementById('expenseFilter').value;
+        const creatorFilter = document.getElementById('expenseCreatorFilter').value;
+        const rows = document.querySelectorAll('.expense-row');
+
+        rows.forEach(row => {
+            const rowType = row.classList.contains('expense-import') ? 'import' :
+                row.classList.contains('expense-salary') ? 'salary' : 'other';
+            const rowCreator = row.getAttribute('data-created-by') || 'admin';
+
+            let show = true;
+            if (typeFilter !== 'all' && rowType !== typeFilter) show = false;
+            if (creatorFilter !== 'all' && rowCreator !== creatorFilter) show = false;
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+
+    // Populate creator filters on load
+    document.addEventListener('DOMContentLoaded', function () {
+        const populateFilter = (rowsSelector, filterId) => {
+            const rows = document.querySelectorAll(rowsSelector);
+            const creators = new Set();
+            rows.forEach(row => {
+                const creator = row.getAttribute('data-created-by');
+                if (creator) creators.add(creator);
+            });
+
+            const filter = document.getElementById(filterId);
+            Array.from(creators).sort().forEach(creator => {
+                const option = document.createElement('option');
+                option.value = creator;
+                option.textContent = creator;
+                filter.appendChild(option);
+            });
+        };
+
+        populateFilter('.revenue-row', 'revenueCreatorFilter');
+        populateFilter('.expense-row', 'expenseCreatorFilter');
+    });
+
+    window.onclick = function (event) {
+        const modal = document.getElementById('transactionModal');
+        const deleteModal = document.getElementById('deleteConfirmModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+        if (event.target == deleteModal) {
+            deleteModal.style.display = "none";
+        }
+    }
+
+    // Customer search for transaction modal
+    const customerSearchTransaction = document.getElementById('customerSearchTransaction');
+    const customerResultsTransaction = document.getElementById('customerResultsTransaction');
+    const customerIdTransaction = document.getElementById('customerIdTransaction');
+
+    if (customerSearchTransaction) {
+        customerSearchTransaction.addEventListener('input', function () {
+            const query = this.value.trim();
+            if (query.length < 2) {
+                customerResultsTransaction.innerHTML = '';
+                customerResultsTransaction.style.display = 'none';
+                return;
+            }
+
+            fetch(`/customers/search?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(customers => {
+                    if (customers.length === 0) {
+                        customerResultsTransaction.innerHTML = '<div class="search-result-item">Không tìm thấy khách hàng</div>';
+                        customerResultsTransaction.style.display = 'block';
+                        return;
+                    }
+
+                    customerResultsTransaction.innerHTML = customers.map(c =>
+                        `<div class="search-result-item" data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}">
+                            <strong>${c.name}</strong> - ${c.phone}
+                        </div>`
+                    ).join('');
+                    customerResultsTransaction.style.display = 'block';
+
+                    // Add click handlers
+                    document.querySelectorAll('#customerResultsTransaction .search-result-item').forEach(item => {
+                        item.addEventListener('click', function () {
+                            const id = this.dataset.id;
+                            const name = this.dataset.name;
+                            const phone = this.dataset.phone;
+
+                            if (id) {
+                                customerSearchTransaction.value = `${name} - ${phone}`;
+                                customerIdTransaction.value = id;
+                                customerResultsTransaction.innerHTML = '';
+                                customerResultsTransaction.style.display = 'none';
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error(err));
+        });
+
+        // Clear on focus
+        customerSearchTransaction.addEventListener('focus', function () {
+            customerIdTransaction.value = '';
+        });
+    }
+
+</script>

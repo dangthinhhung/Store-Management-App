@@ -1,0 +1,50 @@
+<div class="page-header">
+    <h2>Lịch sử đơn hàng bán lẻ</h2>
+    <a href="/pos" class="btn btn-primary">Quay lại POS</a>
+</div>
+
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày bán</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Giảm giá</th>
+                <th>Thực thu</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each orders}}
+            <tr>
+                <td>{{this.code}}</td>
+                <td>{{this.created_at}}</td>
+                <td>{{#if this.customer_name}}{{this.customer_name}}{{else}}Khách lẻ{{/if}}</td>
+                <td>{{formatCurrency this.total_amount}}</td>
+                <td>{{formatCurrency this.discount}}</td>
+                <td><strong>{{formatCurrency this.final_amount}}</strong></td>
+                <td>
+                    <a href="/pos/{{this.id}}" class="btn-icon">Chi tiết</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-icon {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>

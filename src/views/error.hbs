@@ -1,0 +1,65 @@
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">🚫</div>
+        <h1>{{title}}</h1>
+        <p class="error-message">{{message}}</p>
+        <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+    </div>
+</div>
+
+{{#if showPopup}}
+<script>
+    alert('Bạn không có quyền truy cập trang này!');
+    window.history.back();
+</script>
+{{/if}}
+
+<style>
+    .error-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
+
+    .error-card {
+        background: white;
+        padding: 60px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 500px;
+    }
+
+    .error-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+    }
+
+    .error-card h1 {
+        color: #dc2626;
+        margin-bottom: 15px;
+        font-size: 28px;
+    }
+
+    .error-message {
+        color: #64748b;
+        font-size: 18px;
+        margin-bottom: 30px;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #0f766e;
+    }
+</style>

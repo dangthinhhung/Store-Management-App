@@ -1,0 +1,245 @@
+<div class="page-header">
+    <h2>Tiếp nhận sửa chữa</h2>
+    <a href="/workshop" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="form-container">
+    <form action="/workshop" method="POST">
+        <div class="customer-section">
+            <div class="form-group">
+                <label class="form-label">Khách hàng</label>
+                <div class="customer-search-wrapper">
+                    <input type="text" id="customerSearch" class="form-control"
+                        placeholder="Tìm theo SĐT hoặc tên khách hàng..." autocomplete="off">
+                    <input type="hidden" name="customer_phone" id="selectedCustomerPhone">
+                    <div id="customerResults" class="search-results" style="display:none;"></div>
+                    <div id="selectedCustomerDisplay" class="selected-customer" style="display:none;">
+                        <strong id="selectedCustomerName"></strong> - <span id="selectedCustomerPhoneDisplay"></span>
+                        <button type="button" class="btn-clear" onclick="clearCustomer()">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="devices-container">
+            <!-- Devices will be added here -->
+        </div>
+
+        <button type="button" class="btn btn-success" id="addDeviceBtn">+ Thêm thiết bị</button>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Lưu phiếu tiếp nhận</button>
+        </div>
+    </form>
+</div>
+
+<template id="deviceTemplate">
+    <div class="device-row">
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Loại thiết bị</label>
+                    <input type="text" name="device_type" class="form-control" placeholder="Ví dụ: Laptop, Máy giặt..."
+                        required>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Mã/Model</label>
+                    <input type="text" name="device_code" class="form-control" placeholder="Model hoặc Serial">
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Mô tả lỗi</label>
+            <textarea name="issue_description" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" name="quantity" class="form-control" value="1" min="1" required>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Chi phí (cho 1 máy)</label>
+                    <input type="text" name="unit_repair_price" class="form-control currency-input" value="0"
+                        oninput="updateDeviceTotal(this)">
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label">Tổng chi phí dự kiến</label>
+                    <input type="text" class="form-control device-total" readonly value="0 ₫">
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-danger remove-btn">Xóa thiết bị này</button>
+    </div>
+</template>
+
+<script>
+    // === Customer Search ===
+    const customerSearchInput = document.getElementById('customerSearch');
+    const customerResults = document.getElementById('customerResults');
+    const selectedCustomerPhone = document.getElementById('selectedCustomerPhone');
+    const selectedCustomerDisplay = document.getElementById('selectedCustomerDisplay');
+    const selectedCustomerName = document.getElementById('selectedCustomerName');
+    const selectedCustomerPhoneDisplay = document.getElementById('selectedCustomerPhoneDisplay');
+
+    let customers = [];
+
+    // Load customers
+    fetch('/customers/search?q=')
+        .then(res => res.json())
+        .then(data => {
+            customers = data;
+        });
+
+    customerSearchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        if (query.length < 2) {
+            customerResults.style.display = 'none';
+            return;
+        }
+
+        const matches = customers.filter(c =>
+            c.name.toLowerCase().includes(query) ||
+            c.phone.includes(query)
+        );
+
+        if (matches.length > 0) {
+            customerResults.innerHTML = matches.map(c => `
+                <div class="result-item" onclick="selectCustomer('${c.phone}', '${c.name}')">
+                    <strong>${c.name}</strong> - ${c.phone}
+                </div>
+            `).join('');
+            customerResults.style.display = 'block';
+        } else {
+            customerResults.style.display = 'none';
+        }
+    });
+
+    function selectCustomer(phone, name) {
+        selectedCustomerPhone.value = phone;
+        selectedCustomerName.textContent = name;
+        selectedCustomerPhoneDisplay.textContent = phone;
+        selectedCustomerDisplay.style.display = 'block';
+        customerSearchInput.style.display = 'none';
+        customerResults.style.display = 'none';
+    }
+
+    function clearCustomer() {
+        selectedCustomerPhone.value = '';
+        selectedCustomerDisplay.style.display = 'none';
+        customerSearchInput.style.display = 'block';
+        customerSearchInput.value = '';
+    }
+
+    // === Device Management ===
+    const container = document.getElementById('devices-container');
+    const template = document.getElementById('deviceTemplate');
+    const addBtn = document.getElementById('addDeviceBtn');
+
+    // Update device total when quantity or price changes
+    function updateDeviceTotal(input) {
+        const deviceCard = input.closest('.device-row');
+        const quantity = parseFloat(deviceCard.querySelector('input[name="quantity"]').value) || 0;
+        const unitPriceValue = deviceCard.querySelector('input[name="unit_repair_price"]').value.replace(/,/g, '') || '0';
+        const unitPrice = parseFloat(unitPriceValue) || 0;
+        const total = quantity * unitPrice;
+        const totalField = deviceCard.querySelector('.device-total');
+        totalField.value = formatMoney(total);
+    }
+
+    function formatMoney(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+
+    function addDevice() {
+        const clone = template.content.cloneNode(true);
+        const deviceRow = clone.querySelector('.device-row');
+
+        // Add event listeners for dynamic calculation
+        const quantityInput = deviceRow.querySelector('input[name="quantity"]');
+        const priceInput = deviceRow.querySelector('input[name="unit_repair_price"]');
+
+        quantityInput.addEventListener('input', function () {
+            updateDeviceTotal(this);
+        });
+
+        priceInput.addEventListener('input', function () {
+            updateDeviceTotal(this);
+        });
+
+        // Remove button
+        const removeBtn = deviceRow.querySelector('.remove-btn');
+        removeBtn.addEventListener('click', function () {
+            deviceRow.remove();
+        });
+
+        container.appendChild(clone);
+    }
+
+    addDevice(); // Add first one
+
+    addBtn.addEventListener('click', addDevice);
+</script>
+
+<style>
+    .form-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        max-width: 800px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .device-row {
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        background: #f8fafc;
+        position: relative;
+    }
+
+    .row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    .customer-section {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .btn-success {
+        background-color: #22c55e;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+        margin-top: 10px;
+    }
+
+    .form-actions {
+        margin-top: 30px;
+        text-align: right;
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

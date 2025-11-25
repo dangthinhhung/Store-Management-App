@@ -1,0 +1,91 @@
+<div class="page-header">
+    <h2>Lịch sử giao dịch khác</h2>
+    <a href="/reports" class="btn btn-secondary">Quay lại báo cáo</a>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã giao dịch</th>
+                <th>Loại</th>
+                <th>Tên giao dịch</th>
+                <th>Số tiền</th>
+                <th>Ngày giao dịch</th>
+                <th>Chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each transactions}}
+            <tr>
+                <td>{{this.code}}</td>
+                <td>
+                    {{#if (eq this.type 'INCOME')}}
+                    <span class="badge badge-success">Thu</span>
+                    {{else}}
+                    <span class="badge badge-danger">Chi</span>
+                    {{/if}}
+                </td>
+                <td>{{this.transaction_name}}</td>
+                <td>
+                    <span class="{{#if (eq this.type 'INCOME')}}text-success{{else}}text-danger{{/if}}">
+                        {{formatCurrency this.amount}}
+                    </span>
+                </td>
+                <td>{{this.transaction_date}}</td>
+                <td>
+                    <a href="/transactions/code/{{this.code}}?back=/transactions" class="btn-icon-sm">Xem</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .text-success {
+        color: #166534;
+        font-weight: bold;
+    }
+
+    .text-danger {
+        color: #991b1b;
+        font-weight: bold;
+    }
+
+    .btn-icon-sm {
+        font-size: 12px;
+        padding: 2px 6px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #334155;
+    }
+
+    .btn-icon-sm:hover {
+        background: #cbd5e1;
+    }
+</style>

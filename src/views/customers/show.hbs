@@ -1,0 +1,164 @@
+<div class="page-header">
+    <h2>Chi tiết khách hàng: {{customer.name}}</h2>
+    <a href="/customers" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="row">
+    <div class="col-4">
+        <div class="card">
+            <h3>Thông tin khách hàng</h3>
+            <p><strong>SĐT:</strong> {{customer.phone}}</p>
+            <p><strong>Địa chỉ:</strong> {{customer.address}}</p>
+            <p><strong>Ghi chú:</strong> {{customer.note}}</p>
+            <p><strong>Người tạo:</strong> {{customer.created_by}}</p>
+            <a href="/customers/{{customer.phone}}/edit" class="btn btn-primary btn-block mt-20">Sửa thông tin</a>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="card">
+            <h3>Lịch sử giao dịch</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Loại</th>
+                        <th>Mô tả</th>
+                        <th>Số tiền</th>
+                        <th>Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each transactions}}
+                    <tr>
+                        <td>{{this.created_at}}</td>
+                        <td>
+                            {{#if (eq this.type 'INCOME')}}
+                            <span class="badge badge-success">Thu</span>
+                            {{else if (eq this.type 'EXPENSE')}}
+                            <span class="badge badge-danger">Chi</span>
+                            {{else if (eq this.type 'ORDER')}}
+                            <span class="badge badge-info">Đơn hàng</span>
+                            {{else if (eq this.type 'WORKSHOP')}}
+                            <span class="badge badge-warning">Xưởng</span>
+                            {{/if}}
+                        </td>
+                        <td>{{this.description}}</td>
+                        <td>
+                            {{#if (eq this.type 'EXPENSE')}}
+                            <span class="text-danger">-{{formatCurrency this.amount}}</span>
+                            {{else}}
+                            <span class="text-success">+{{formatCurrency this.amount}}</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{#if (eq this.type 'ORDER')}}
+                            <a href="/pos/{{this.transaction_id}}?back=/customers/{{../customer.phone}}"
+                                class="btn-icon">Xem</a>
+                            {{else if (eq this.type 'WORKSHOP')}}
+                            <a href="/workshop/{{this.transaction_id}}?back=/customers/{{../customer.phone}}"
+                                class="btn-icon">Xem</a>
+                            {{else if this.transaction_id}}
+                            <a href="/reports/transaction/{{this.transaction_id}}?back=/customers/{{../customer.phone}}"
+                                class="btn-icon">Xem</a>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Chưa có giao dịch nào</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .col-4 {
+        flex: 1;
+    }
+
+    .col-8 {
+        flex: 2;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+    }
+
+    .mt-20 {
+        margin-top: 20px;
+    }
+
+    .btn-block {
+        display: block;
+        text-align: center;
+    }
+
+    .badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .badge-info {
+        background-color: #dbeafe;
+        color: #1e40af;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .text-success {
+        color: #166534;
+        font-weight: 500;
+    }
+
+    .text-danger {
+        color: #991b1b;
+        font-weight: 500;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-muted {
+        color: #64748b;
+        font-style: italic;
+    }
+</style>

@@ -1,0 +1,165 @@
+<div class="page-header">
+    <h2>Chi tiết sản phẩm: {{product.name}}</h2>
+    <a href="/products" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="row">
+    <div class="col-5">
+        <div class="card">
+            <h3>Thông tin sản phẩm</h3>
+            <form action="/products/{{product.id}}?_method=PUT" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Mã sản phẩm</label>
+                    <input type="text" class="form-control" value="{{product.product_code}}" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tên sản phẩm</label>
+                    <input type="text" name="name" class="form-control" value="{{product.name}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Giá bán</label>
+                    <input type="text" name="default_selling_price" class="form-control currency-input"
+                        value="{{product.default_selling_price}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Đơn vị tính</label>
+                    <input type="text" name="unit" class="form-control" value="{{product.unit}}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="is_active" class="form-control">
+                        <option value="1" {{#if (eq product.is_active 1)}}selected{{/if}}>Đang bán</option>
+                        <option value="0" {{#if (eq product.is_active 0)}}selected{{/if}}>Ngừng bán</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-7">
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab(event, 'imports')">Lịch sử nhập</button>
+                <button class="tab-btn" onclick="openTab(event, 'sales')">Lịch sử bán</button>
+            </div>
+
+            <div id="imports" class="tab-content" style="display: block;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Ngày nhập</th>
+                            <th>Số lượng</th>
+                            <th>Giá nhập</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each importHistory}}
+                        <tr>
+                            <td>{{this.created_at}}</td>
+                            <td>{{this.quantity}}</td>
+                            <td>{{formatCurrency this.import_price}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="sales" class="tab-content" style="display: none;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Ngày bán</th>
+                            <th>Số lượng</th>
+                            <th>Giá bán</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each salesHistory}}
+                        <tr>
+                            <td>{{this.created_at}}</td>
+                            <td>{{this.quantity}}</td>
+                            <td>{{formatCurrency this.price}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
+<style>
+    .row {
+        display: flex;
+        gap: 20px;
+    }
+
+    .col-5 {
+        flex: 5;
+    }
+
+    .col-7 {
+        flex: 7;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+    }
+
+    .tabs {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .tab-btn.active {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+        text-decoration: none;
+    }
+</style>

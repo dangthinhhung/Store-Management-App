@@ -1,0 +1,203 @@
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Phiếu lương tháng {{slip.month}}/{{slip.year}}</h1>
+            <p class="text-muted">Mã phiếu: <strong>{{slip.code}}</strong></p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="goBack()" class="btn btn-secondary">← Quay lại</button>
+            <a href="/users/salary-slips/{{slip.id}}/edit" class="btn btn-primary">✏️ Chỉnh sửa</a>
+        </div>
+    </div>
+
+    <div class="card mb-20">
+        <div class="card-header">
+            <h3>Chi tiết nhân viên</h3>
+        </div>
+        <table class="table table-modern">
+            <thead>
+                <tr>
+                    <th>Nhân viên</th>
+                    <th class="text-right">Lương cứng</th>
+                    <th class="text-right">Thưởng</th>
+                    <th class="text-right">Phạt</th>
+                    <th class="text-right">Tổng thực nhận</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each details}}
+                <tr>
+                    <td>
+                        <div class="employee-info">
+                            <strong>{{this.full_name}}</strong>
+                        </div>
+                    </td>
+                    <td class="text-right">{{formatCurrency this.amount}}</td>
+                    <td class="text-right text-success">{{#if this.bonus}}+{{formatCurrency this.bonus}}{{else}}-{{/if}}
+                    </td>
+                    <td class="text-right text-danger">{{#if this.penalty}}-{{formatCurrency
+                        this.penalty}}{{else}}-{{/if}}</td>
+                    <td class="text-right">
+                        <strong class="total-amount">{{formatCurrency (add (subtract this.amount this.penalty)
+                            this.bonus)}}</strong>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="4" class="text-right"><strong>Tổng cộng:</strong></td>
+                    <td class="text-right"><strong class="grand-total">{{formatCurrency slip.total_amount}}</strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Thông tin phiếu lương</h3>
+        </div>
+        <div class="card-body">
+            <div class="info-row">
+                <span class="info-label">Hình thức thanh toán:</span>
+                <span class="info-value">{{slip.payment_method}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ngày thanh toán:</span>
+                <span class="info-value">{{formatDateTime slip.payment_date}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tổng lương:</span>
+                <span class="info-value highlight">{{formatCurrency slip.total_amount}}</span>
+            </div>
+            {{#if slip.note}}
+            <div class="info-row">
+                <span class="info-label">Ghi chú:</span>
+                <span class="info-value">{{slip.note}}</span>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+        if (document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+            window.history.back();
+        } else {
+            window.location.href = '/users';
+        }
+    }
+</script>
+
+<style>
+    .mb-20 {
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        padding: 20px;
+        border-bottom: 2px solid #e2e8f0;
+        background-color: #f8fafc;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #1e293b;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .table-modern {
+        margin: 0;
+    }
+
+    .table-modern thead {
+        background-color: #f8fafc;
+    }
+
+    .table-modern thead th {
+        padding: 16px;
+        font-weight: 600;
+        color: #475569;
+        font-size: 14px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .table-modern tbody tr {
+        transition: background-color 0.2s;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .table-modern tbody td {
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table-modern tfoot {
+        background-color: #f8fafc;
+    }
+
+    .table-modern tfoot td {
+        padding: 16px;
+        font-size: 16px;
+        border-top: 2px solid #e2e8f0;
+    }
+
+    .employee-info strong {
+        color: #1e293b;
+        font-size: 15px;
+    }
+
+    .total-amount {
+        color: #166534;
+        font-size: 16px;
+    }
+
+    .grand-total {
+        color: #166534;
+        font-size: 18px;
+    }
+
+    .total-row {
+        background-color: #f1f5f9;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .info-value {
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .info-value.highlight {
+        font-size: 18px;
+        font-weight: bold;
+        color: #166534;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+</style>
