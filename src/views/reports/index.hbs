@@ -25,7 +25,10 @@
             {{/if}}
 
             {{#if (eq type 'monthly')}}
-            <input type="month" name="month" class="form-control" value="{{month}}" onchange="this.form.submit()">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="font-weight: 600; color: #1e40af; font-size: 15px;">{{formatMonth month}}</div>
+                <input type="month" name="month" class="form-control" value="{{month}}" onchange="this.form.submit()">
+            </div>
             {{/if}}
 
             {{#if (eq type 'yearly')}}
@@ -44,9 +47,21 @@
         <div class="card summary-card bg-success-light">
             <h3>Tổng thu</h3>
             <div class="amount text-success">{{formatCurrency revenue}}</div>
-            <div class="breakdown">
-                <small>Tiền mặt: {{formatCurrency revenueCash}}</small>
-                <small>CK: {{formatCurrency revenueTransfer}}</small>
+            <div class="breakdown-modern">
+                <div class="breakdown-item">
+                    <span class="breakdown-icon">💵</span>
+                    <div class="breakdown-details">
+                        <span class="breakdown-label">Tiền mặt</span>
+                        <span class="breakdown-value">{{formatCurrency revenueCash}}</span>
+                    </div>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-icon">💳</span>
+                    <div class="breakdown-details">
+                        <span class="breakdown-label">Chuyển khoản</span>
+                        <span class="breakdown-value">{{formatCurrency revenueTransfer}}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -54,9 +69,21 @@
         <div class="card summary-card bg-danger-light">
             <h3>Tổng chi</h3>
             <div class="amount text-danger">{{formatCurrency expense}}</div>
-            <div class="breakdown">
-                <small>Tiền mặt: {{formatCurrency expenseCash}}</small>
-                <small>CK: {{formatCurrency expenseTransfer}}</small>
+            <div class="breakdown-modern">
+                <div class="breakdown-item">
+                    <span class="breakdown-icon">💵</span>
+                    <div class="breakdown-details">
+                        <span class="breakdown-label">Tiền mặt</span>
+                        <span class="breakdown-value">{{formatCurrency expenseCash}}</span>
+                    </div>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-icon">💳</span>
+                    <div class="breakdown-details">
+                        <span class="breakdown-label">Chuyển khoản</span>
+                        <span class="breakdown-value">{{formatCurrency expenseTransfer}}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -401,14 +428,14 @@
                         row.classList.remove('hidden-row');
                         row.setAttribute('data-hidden', 'false');
                         btn.textContent = 'Ẩn';
-                        badge.classList.add('hidden');
+                        if (badge) badge.classList.add('hidden');
                         updateTotals(row, 'add');
                     } else {
                         // Hide
                         row.classList.add('hidden-row');
                         row.setAttribute('data-hidden', 'true');
                         btn.textContent = 'Hiện';
-                        badge.classList.remove('hidden');
+                        if (badge) badge.classList.remove('hidden');
                         updateTotals(row, 'remove');
                     }
                 } else {
@@ -452,19 +479,19 @@
             }
             totalRevenueEl.textContent = formatMoney(currentRevenue);
 
-            // Update breakdown (simplified selector logic, assuming structure)
-            const cashEl = document.querySelector('.bg-success-light .breakdown small:nth-child(1)');
-            const transferEl = document.querySelector('.bg-success-light .breakdown small:nth-child(2)');
+            // Update breakdown with new structure
+            const breakdownItems = document.querySelectorAll('.bg-success-light .breakdown-item');
+            breakdownItems.forEach(item => {
+                const label = item.querySelector('.breakdown-label').textContent;
+                const valueEl = item.querySelector('.breakdown-value');
 
-            if (method === 'Tiền mặt') {
-                let val = parseMoney(cashEl.textContent.split(': ')[1]);
-                val = action === 'add' ? val + amount : val - amount;
-                cashEl.textContent = `Tiền mặt: ${formatMoney(val)}`;
-            } else {
-                let val = parseMoney(transferEl.textContent.split(': ')[1]);
-                val = action === 'add' ? val + amount : val - amount;
-                transferEl.textContent = `CK: ${formatMoney(val)}`;
-            }
+                if ((method === 'Tiền mặt' && label === 'Tiền mặt') ||
+                    (method === 'Chuyển khoản' && label === 'Chuyển khoản')) {
+                    let val = parseMoney(valueEl.textContent);
+                    val = action === 'add' ? val + amount : val - amount;
+                    valueEl.textContent = formatMoney(val);
+                }
+            });
 
         } else if (type === 'EXPENSE') {
             if (action === 'add') {
@@ -474,19 +501,19 @@
             }
             totalExpenseEl.textContent = formatMoney(currentExpense);
 
-            // Update breakdown
-            const cashEl = document.querySelector('.bg-danger-light .breakdown small:nth-child(1)');
-            const transferEl = document.querySelector('.bg-danger-light .breakdown small:nth-child(2)');
+            // Update breakdown with new structure
+            const breakdownItems = document.querySelectorAll('.bg-danger-light .breakdown-item');
+            breakdownItems.forEach(item => {
+                const label = item.querySelector('.breakdown-label').textContent;
+                const valueEl = item.querySelector('.breakdown-value');
 
-            if (method === 'Tiền mặt') {
-                let val = parseMoney(cashEl.textContent.split(': ')[1]);
-                val = action === 'add' ? val + amount : val - amount;
-                cashEl.textContent = `Tiền mặt: ${formatMoney(val)}`;
-            } else {
-                let val = parseMoney(transferEl.textContent.split(': ')[1]);
-                val = action === 'add' ? val + amount : val - amount;
-                transferEl.textContent = `CK: ${formatMoney(val)}`;
-            }
+                if ((method === 'Tiền mặt' && label === 'Tiền mặt') ||
+                    (method === 'Chuyển khoản' && label === 'Chuyển khoản')) {
+                    let val = parseMoney(valueEl.textContent);
+                    val = action === 'add' ? val + amount : val - amount;
+                    valueEl.textContent = formatMoney(val);
+                }
+            });
         }
 
         // Update Profit

@@ -150,6 +150,7 @@ const Workshop = {
     toggleHidePayment: (id, callback) => {
         db.get("SELECT is_hidden FROM workshop_payments WHERE id = ?", [id], (err, row) => {
             if (err) return callback(err);
+            if (!row) return callback(new Error('Payment not found'));
             const newStatus = row.is_hidden ? 0 : 1;
             db.run("UPDATE workshop_payments SET is_hidden = ? WHERE id = ?", [newStatus, id], callback);
         });

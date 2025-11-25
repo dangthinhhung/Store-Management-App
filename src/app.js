@@ -29,6 +29,12 @@ app.engine('hbs', engine({
             if (!date) return '';
             return new Date(date).toLocaleString('vi-VN');
         },
+        formatMonth: (monthString) => {
+            // monthString format: "YYYY-MM"
+            if (!monthString) return '';
+            const [year, month] = monthString.split('-');
+            return `Tháng ${parseInt(month)} năm ${year}`;
+        },
         eq: (a, b) => a == b,
         ne: (a, b) => a != b,
         gt: (a, b) => a > b,

@@ -1,22 +1,45 @@
 <aside class="sidebar">
     <div class="sidebar-header">
-        <h2>Store Manager</h2>
+        <div class="logo-text">Quản lý Cửa hàng</div>
     </div>
     <nav class="sidebar-nav">
         <ul>
-            <li><a href="/pos" class="{{#if (eq active 'pos')}}active{{/if}}">Đơn bán lẻ</a></li>
-            <li><a href="/workshop" class="{{#if (eq active 'workshop')}}active{{/if}}">Đơn xưởng</a></li>
-            <li><a href="/customers" class="{{#if (eq active 'customers')}}active{{/if}}">Khách hàng</a></li>
+            <!-- Giao dịch -->
+            <li class="nav-section-title">Giao dịch</li>
+            <li><a href="/pos" class="{{#if (eq active 'pos')}}active{{/if}}">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">Đơn bán lẻ</span>
+                </a></li>
+            <li><a href="/workshop" class="{{#if (eq active 'workshop')}}active{{/if}}">
+                    <span class="nav-icon">🔧</span>
+                    <span class="nav-text">Đơn sửa chữa</span>
+                </a></li>
+            <li><a href="/customers" class="{{#if (eq active 'customers')}}active{{/if}}">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Khách hàng</span>
+                </a></li>
 
-            <li class="nav-divider"></li>
+            <!-- Kho hàng -->
+            <li class="nav-section-title">Kho hàng</li>
+            <li><a href="/products" class="{{#if (eq active 'products')}}active{{/if}}">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Sản phẩm</span>
+                </a></li>
+            <li><a href="/imports" class="{{#if (eq active 'imports')}}active{{/if}}">
+                    <span class="nav-icon">📥</span>
+                    <span class="nav-text">Nhập hàng</span>
+                </a></li>
 
-            <li><a href="/products" class="{{#if (eq active 'products')}}active{{/if}}">Sản phẩm</a></li>
-            <li><a href="/imports" class="{{#if (eq active 'imports')}}active{{/if}}">Nhập hàng</a></li>
-
-            <li class="nav-divider"></li>
-
-            <li><a href="/reports" class="{{#if (eq active 'reports')}}active{{/if}}">Báo cáo</a></li>
-            <li><a href="/users" class="{{#if (eq active 'users')}}active{{/if}}">Nhân viên và lương</a></li>
+            <!-- Quản lý -->
+            <li class="nav-section-title">Quản lý</li>
+            <li><a href="/reports" class="{{#if (eq active 'reports')}}active{{/if}}">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Báo cáo</span>
+                </a></li>
+            <li><a href="/users" class="{{#if (eq active 'users')}}active{{/if}}">
+                    <span class="nav-icon">💼</span>
+                    <span class="nav-text">Lương và Nhân viên</span>
+                </a></li>
         </ul>
     </nav>
 </aside>

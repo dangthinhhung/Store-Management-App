@@ -128,6 +128,7 @@ const Order = {
     toggleHide: (id, callback) => {
         db.get("SELECT is_hidden FROM orders WHERE id = ?", [id], (err, row) => {
             if (err) return callback(err);
+            if (!row) return callback(new Error('Order not found'));
             const newStatus = row.is_hidden ? 0 : 1;
             db.run("UPDATE orders SET is_hidden = ? WHERE id = ?", [newStatus, id], callback);
         });

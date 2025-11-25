@@ -46,6 +46,7 @@ const Transaction = {
     toggleHide: (id, callback) => {
         db.get("SELECT is_hidden FROM transactions WHERE id = ?", [id], (err, row) => {
             if (err) return callback(err);
+            if (!row) return callback(new Error('Transaction not found'));
             const newStatus = row.is_hidden ? 0 : 1;
             db.run("UPDATE transactions SET is_hidden = ? WHERE id = ?", [newStatus, id], callback);
         });

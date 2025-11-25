@@ -10,61 +10,63 @@
 </div>
 
 <div class="details-container">
-    <div class="row">
-        <div class="col-8">
-            <div class="card">
-                <h3>Thông tin thiết bị</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Thiết bị</th>
-                            <th>Lỗi</th>
-                            <th>SL</th>
-                            <th>Chi phí</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each order.items}}
-                        <tr>
-                            <td>
-                                <strong>{{this.device_type}}</strong><br>
-                                <small>{{this.device_code}}</small>
-                            </td>
-                            <td>{{this.issue_description}}</td>
-                            <td>{{this.quantity}}</td>
-                            <td>{{formatCurrency this.repair_price}}</td>
-                            <td>{{formatCurrency (multiply this.quantity this.repair_price)}}</td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" class="text-right"><strong>Tổng cộng:</strong></td>
-                            <td><strong>{{formatCurrency order.total_cost}}</strong></td>
-                        </tr>
-                    </tfoot>
-                </table>
+    <!-- Device Information - Full Width -->
+    <div class="card">
+        <h3>Thông tin thiết bị</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Thiết bị</th>
+                    <th>Lỗi</th>
+                    <th>SL</th>
+                    <th>Chi phí</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each order.items}}
+                <tr>
+                    <td>
+                        <strong>{{this.device_type}}</strong><br>
+                        <small>{{this.device_code}}</small>
+                    </td>
+                    <td>{{this.issue_description}}</td>
+                    <td>{{this.quantity}}</td>
+                    <td>{{formatCurrency this.repair_price}}</td>
+                    <td>{{formatCurrency (multiply this.quantity this.repair_price)}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Tổng cộng:</strong></td>
+                    <td><strong>{{formatCurrency order.total_cost}}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Payment Section - Full Width -->
+    <div class="card">
+        <h3>Thanh toán</h3>
+
+        <div class="payment-summary">
+            <div class="summary-row">
+                <span>Tổng chi phí:</span>
+                <span>{{formatCurrency order.total_cost}}</span>
+            </div>
+            <div class="summary-row">
+                <span>Đã thanh toán:</span>
+                <span class="text-success">{{formatCurrency order.total_paid}}</span>
+            </div>
+            <div class="summary-row total">
+                <span>Còn lại:</span>
+                <span class="text-danger">{{formatCurrency order.remaining}}</span>
             </div>
         </div>
-        <div class="col-4">
-            <div class="card">
-                <h3>Thanh toán</h3>
-                <div class="payment-summary">
-                    <div class="summary-row">
-                        <span>Tổng chi phí:</span>
-                        <span>{{formatCurrency order.total_cost}}</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Đã thanh toán:</span>
-                        <span class="text-success">{{formatCurrency order.total_paid}}</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Còn lại:</span>
-                        <span class="text-danger">{{formatCurrency order.remaining}}</span>
-                    </div>
-                </div>
 
+        <div class="row">
+            <div class="col-6">
                 <div class="payment-actions">
                     {{#if (gt order.remaining 0)}}
                     <form action="/workshop/{{order.id}}/payment" method="POST" class="payment-form">
@@ -105,6 +107,25 @@
                 </div>
                 <p><strong>Người tạo:</strong> {{order.created_by}}</p>
 
+                <div class="status-actions">
+                    <h3>Trạng thái</h3>
+                    <form action="/workshop/{{order.id}}/status" method="POST">
+                        <div class="form-group">
+                            <select name="status" class="form-control">
+                                <option value="IN_REPAIR" {{#if (eq order.status 'IN_REPAIR' )}}selected{{/if}}>Đang sửa
+                                </option>
+                                <option value="REPAIRED_DEBT" {{#if (eq order.status 'REPAIRED_DEBT' )}}selected{{/if}}>
+                                    Đã sửa - Còn nợ</option>
+                                <option value="RETURNED" {{#if (eq order.status 'RETURNED' )}}selected{{/if}}>Hoàn đơn
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-block">Cập nhật trạng thái</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-6">
                 <div class="payment-history">
                     <h3>Lịch sử thanh toán</h3>
                     {{#if order.payments}}
@@ -134,23 +155,6 @@
                     <p class="text-muted">Chưa có thanh toán nào</p>
                     {{/if}}
                 </div>
-
-                <div class="status-actions">
-                    <h3>Trạng thái</h3>
-                    <form action="/workshop/{{order.id}}/status" method="POST">
-                        <div class="form-group">
-                            <select name="status" class="form-control">
-                                <option value="IN_REPAIR" {{#if (eq order.status 'IN_REPAIR' )}}selected{{/if}}>Đang sửa
-                                </option>
-                                <option value="REPAIRED_DEBT" {{#if (eq order.status 'REPAIRED_DEBT' )}}selected{{/if}}>
-                                    Đã sửa - Còn nợ</option>
-                                <option value="RETURNED" {{#if (eq order.status 'RETURNED' )}}selected{{/if}}>Hoàn đơn
-                                </option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-secondary btn-block">Cập nhật trạng thái</button>
-                    </form>
-                </div>
             </div>
         </div>
     </div>
@@ -162,11 +166,7 @@
         gap: 20px;
     }
 
-    .col-8 {
-        flex: 2;
-    }
-
-    .col-4 {
+    .col-6 {
         flex: 1;
     }
 
